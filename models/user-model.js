@@ -1,16 +1,16 @@
-const mongoose=require('mongoose');
+import mongoose from 'mongoose';
 
-
-const userSchema=mongoose.Schema({
-    fullname : String,
+const userSchema = new mongoose.Schema({
+    fullname: String,
     email: String,
-    password:String,
-    posts:{
-        type:Array,
-        default:[],
+    password: String,
+    posts: {
+       type: mongoose.Schema.Types.ObjectId,
+       ref: 'posts'
     },
-    contact:Number,
-    picture:String,
-})
+    contact: Number
+});
 
-module.exports=mongoose.model('users',userSchema);
+// ✅ Use ES module export
+const userModel = mongoose.model('users', userSchema);
+export default userModel;

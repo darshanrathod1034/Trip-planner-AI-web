@@ -1,13 +1,17 @@
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const mongoose = require('mongoose');
-const path=require('path');
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
+import path from 'path';
+import { fileURLToPath } from 'url'; // Needed to fix __dirname issue
+import session from 'express-session';
+import flash from 'express-flash'; // Import flash properly
 
-const usersRouter = require('./routes/usersRouter');
-const productsRouter = require('./routes/productsRouter');
-const index=require('./routes/index');
-const expresssession=require('express-session');
-const flash=require('express-flash');
+import usersRouter from './routes/usersRouter.js'; // Add .js for ES modules
+//import isLoggedIn from './middlewares/isloggedin.js';
+
+// Workaround for __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 5555;
@@ -15,34 +19,32 @@ const PORT = 5555;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname,'public')));
-app.use(cookieParser()); // Use cookie parser if needed
-app.use( expresssession ({
-  resave:false, saveUninitialized:false, secret:'highhook', cookie:{maxAge:60000}})
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser());
+app.use(
+  session({
+    resave: false,
+    saveUninitialized: false,
+    secret: 'highhook',
+    cookie: { maxAge: 60000 },
+  })
 );
-app.use(flash());
+app.use(flash()); // Now properly imported
+
+app.use('/users', usersRouter);
 
 // MongoDB Connection
-//const MONGO_URI = "mongodb+srv://darshanvipulkumarrathod81:CXCEUeSjZotxBgtc@cluster0.zhso0.mongodb.net/your_database_name";
-
-
-// Routes
-app.use('/users', usersRouter);
-app.use('/products', productsRouter);
-app.use('/',index);
-
-
-mongoose.connect("mongodb://127.0.0.1:27017/tripplanner" )
+mongoose
+  .connect('mongodb://127.0.0.1:27017/tripplanner')
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch((err) => {
     console.error('❌ MongoDB connection error:', err.message);
-    process.exit(1); // Exit if the connection fails
+    process.exit(1);
   });
 
-
-// Routes
+// Default Route
 app.get('/', (req, res) => {
-  res.send('<h1>WELCOME AI TRIP PLANNER </h1>');
+  res.send('<h1>WELCOME AI TRIP PLANNER</h1>');
 });
 
 // Start the server

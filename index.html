@@ -7,7 +7,29 @@
     <title>Vite + React</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <h1>Test Create Post</h1>
+      <form id="postForm" enctype="multipart/form-data" meathod="POST" action="/users/createpost">
+          <label for="name">Name:</label>
+          <input type="text" id="name" name="name" required><br><br>
+          
+          <label for="description">Description:</label>
+          <textarea id="description" name="description" required></textarea><br><br>
+          
+          <label for="picture">Picture URL:</label>
+          <input type="text" id="picture" name="picture"><br><br>
+          
+          <label for="image">Upload Image:</label>
+          <input type="file" id="image" name="image" accept="image/*" required><br><br>
+          
+          <button type="submit">Submit</button>
+      </form>
+
+    </div>
+
+    
+
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

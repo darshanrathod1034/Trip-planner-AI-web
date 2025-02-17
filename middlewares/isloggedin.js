@@ -1,33 +1,34 @@
-const jwt=require('jsonwebtoken');
-const userModel = require('../models/users-model');
-const e = require('express');
-module.exports=async (req,res,next)=>{
+import jwt from 'jsonwebtoken';
+//import userModel from '../models/users-model.js';
+//import userModel from '../models/users-model.js';
+import userModel from '../models/user-model.js'; // Correct relative path
 
-//let decoded=jwt.verify(req.cookies.token,'highhook');
-if(!req.cookies.token){ 
-    res.flash('error','Please login first');
-    return res.redirect('/'); }
+const isLoggedIn = async (req, res, next) => {
+    if (!req.cookies.token) { 
+      //  req.flash('error', 'Please login first');
+        return res.redirect('/');
+    }
 
-try{
-    let decoded=jwt.verify(req.cookies.token,'highhook');
-    let user=await userModel.findOne({email:decoded.email}).select('-password');
+    try {
+        let decoded = jwt.verify(req.cookies.token, 'highhook');
+        let user = await userModel.findOne({ email: decoded.email }).select('-password');
 
-    req.user=user;
-    next();
+        req.user = user;
+        next();
+    } catch (error) {
+       // req.flash('error', 'Please login first');
+        return res.redirect('/');
+    }
+};
 
-}
-catch(error){
-    res.flash('error','Please login first');
-    return res.redirect('/');
-
-}
-
-
-
+export default isLoggedIn;
 
 
 
 
 
 
-}
+
+
+
+
