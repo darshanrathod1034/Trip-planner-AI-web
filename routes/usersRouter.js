@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import userModel from '../models/user-model.js'; // Adjust the path as necessary
 import postModel from '../models/post-model.js'; // Ensure correct file path
 import multer from 'multer';
-import cookieParser from 'cookie-parser';
+
 import isLoggedIn from '../middlewares/isloggedin.js';
 
 const userRouter = express.Router();
@@ -23,6 +23,8 @@ userRouter.post('/register', async (req, res) => {
     if (!fullname || !email || !password) {
       return res.status(400).send('All input is required');
     }
+
+
 
     let existingUser = await userModel.findOne({ email });
     if (existingUser) {
@@ -92,7 +94,7 @@ userRouter.post('/createpost',isLoggedIn, upload.single("image"), async (req, re
   try {
     const { name, description, picture } = req.body;
     //const { user } = req.user;
-    let user = await userModel.findOne({ email: req.user.email }).populate('posts');
+    let user = await userModel.findOne({ email: req.user.email });
     if (!name || !description) {
       return res.status(400).json({ message: "Name and description are required" });
     }
@@ -108,7 +110,10 @@ userRouter.post('/createpost',isLoggedIn, upload.single("image"), async (req, re
       picture
     });
 
+    
+    user.post.push(post._id);
     await post.save();
+    await user.save();
 
     res.status(201).json({ message: "Post created successfully", post });
 

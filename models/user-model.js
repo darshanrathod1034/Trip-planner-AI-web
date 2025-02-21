@@ -4,11 +4,11 @@ const userSchema = new mongoose.Schema({
     fullname: String,
     email: String,
     password: String,
-    posts: {
+    post: [{
        type: mongoose.Schema.Types.ObjectId,
        ref: 'posts'
-    },
-    contact: Number
+    }],
+    phone: Number
 });
 
 // ✅ Use ES module export
