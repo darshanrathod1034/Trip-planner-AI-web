@@ -1,6 +1,8 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
+import cors from "cors";
+
 
 import path from 'path';
 import { fileURLToPath } from 'url'; // Needed to fix __dirname issue
@@ -10,6 +12,8 @@ import flash from 'express-flash'; // Import flash properly
 import usersRouter from './routes/usersRouter.js'; // Add .js for ES modules
 //import authRouter from './routes/authRouter.js'; // Add .js for ES modules
 import authRouter from './routes/authRouter.js';
+import placeRouter from './routes/placeRouter.js';
+
 
 
 
@@ -23,6 +27,7 @@ const PORT = 5555;
 
 // Middleware
 app.use(express.json());
+app.use(cors())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
@@ -38,6 +43,7 @@ app.use(flash()); // Now properly imported
 
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
+app.use("/api/places", placeRouter);
 //app.use('/auth', authRouter);
 
 // MongoDB Connection
