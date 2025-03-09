@@ -5,21 +5,21 @@ const postSchema = new mongoose.Schema({
   description: { type: String, required: true },
   userid: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'users', // Ensure it matches your User model name
+    ref: 'users', // ✅ Matches user model name
     required: true 
   },
-  image: { type: Buffer }, // Optional, used for storing image in DB
-  picture: { type: String }, // Optional, used for image URL
+  image: { type: Buffer }, 
+  picture: { type: String }, 
   likes: { type: Number, default: 0 },
   comments: [{
     userid: { 
       type: mongoose.Schema.Types.ObjectId, 
-      ref: 'users', // Ensure it matches your User model name
+      ref: 'users', // ✅ Matches user model name
       required: true 
     },
     comment: { type: String, required: true }
   }]
-}, { timestamps: true }); // Adds createdAt & updatedAt automatically
+}, { timestamps: true });
 
-const postModel = mongoose.model('Posts', postSchema);
+const postModel = mongoose.model('post', postSchema);  // ✅ Keep as 'posts'
 export default postModel;

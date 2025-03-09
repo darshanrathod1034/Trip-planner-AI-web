@@ -6,15 +6,14 @@ const userSchema = new mongoose.Schema({
     password: String,
     post: [{
        type: mongoose.Schema.Types.ObjectId,
-       ref: 'posts'
+       ref: 'post'  // ✅ Matches model name exactly
     }],
     saved_places: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'place'
+        ref: 'place'  // Ensure it matches the place model
      }],
     phone: Number
 });
 
-// ✅ Use ES module export
-const userModel = mongoose.model('users', userSchema);
+const userModel = mongoose.model('users', userSchema);  // ✅ Keep as 'users'
 export default userModel;

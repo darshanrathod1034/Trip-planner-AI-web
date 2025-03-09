@@ -106,10 +106,10 @@ userRouter.post('/createpost',isLoggedIn, upload.single("image"), async (req, re
       name,
       description,
       userid: user._id,
-      image: req.file.buffer, // Ensure your schema supports Buffer type
+      image: req.file.buffer, 
       picture
     });
-
+       
     
     user.post.push(post._id);
     await post.save();
@@ -122,6 +122,51 @@ userRouter.post('/createpost',isLoggedIn, upload.single("image"), async (req, re
     res.status(500).json({ message: "Server error" });
   }
 });
+
+userRouter.get('/myposts',isLoggedIn, async (req, res) => {
+  try {
+    let user = await userModel.findOne({ email: req.user.email }).populate('post');
+    res.status(200).json({ post: user.post });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+userRouter.get('/allposts', async (req, res) => {
+  try {
+    let posts = await postModel.find();
+    res.status(200).json({ posts });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+userRouter.post('/likepost/:id',isLoggedIn, async (req, res) => {
+  try {
+    let post = await postModel.findById(req.params.id);
+    post.likes += 1;
+    await post.save();
+    res.status(200).json({ message: "Post liked" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+userRouter.post('/addcomment/:id',isLoggedIn, async (req, res) => {
+  try {
+    let post = await postModel.findById(req.params.id);
+    let user =await userModel.findOne({ email: req.user.email });
+    post.comments.push({ userid: user._id, comment: req.body.comment });
+    await post.save();
+    //await user.save();
+    res.status(200).json({ message: "Comment added" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }});
 
 
 // User Logout
