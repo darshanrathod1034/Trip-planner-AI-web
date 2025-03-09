@@ -5,6 +5,10 @@ import jwt from 'jsonwebtoken';
 import userModel from '../models/user-model.js'; // Adjust the path as necessary
 import postModel from '../models/post-model.js'; // Ensure correct file path
 import multer from 'multer';
+import cloudinary from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import dotenv from "dotenv";
+dotenv.config();
 
 import isLoggedIn from '../middlewares/isloggedin.js';
 
@@ -85,16 +89,31 @@ userRouter.post('/login', async (req, res) => {
   }
 });
 
-// Memory Storage for Multer
-const storage = multer.memoryStorage();
+// Configure Cloudinary
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Configure Multer Storage with Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary.v2,
+  params: {
+    folder: "trip_planner_posts", // Your folder name in Cloudinary
+    format: async () => "jpg", // Change format if needed
+    public_id: (req, file) => file.originalname.split(".")[0] // Use original filename
+  }
+});
+
 const upload = multer({ storage });
 
-
-userRouter.post('/createpost',isLoggedIn, upload.single("image"), async (req, res) => {
+// Updated Route to Upload Image & Store Cloudinary URL
+userRouter.post("/createpost", isLoggedIn, upload.single("image"), async (req, res) => {
   try {
-    const { name, description, picture } = req.body;
-    //const { user } = req.user;
+    const { name, description } = req.body;
     let user = await userModel.findOne({ email: req.user.email });
+
     if (!name || !description) {
       return res.status(400).json({ message: "Name and description are required" });
     }
@@ -106,17 +125,14 @@ userRouter.post('/createpost',isLoggedIn, upload.single("image"), async (req, re
       name,
       description,
       userid: user._id,
-      image: req.file.buffer, 
-      picture
+      picture: req.file.path // Cloudinary URL
     });
-       
-    
+
     user.post.push(post._id);
     await post.save();
     await user.save();
 
     res.status(201).json({ message: "Post created successfully", post });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });

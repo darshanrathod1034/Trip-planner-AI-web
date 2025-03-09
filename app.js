@@ -13,6 +13,8 @@ import usersRouter from './routes/usersRouter.js'; // Add .js for ES modules
 //import authRouter from './routes/authRouter.js'; // Add .js for ES modules
 import authRouter from './routes/authRouter.js';
 import placeRouter from './routes/placeRouter.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 
 
@@ -48,7 +50,7 @@ app.use("/api/places", placeRouter);
 
 // MongoDB Connection
 mongoose
-  .connect('mongodb://127.0.0.1:27017/tripplanner')
+  .connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch((err) => {
     console.error('❌ MongoDB connection error:', err.message);
