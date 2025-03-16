@@ -58,6 +58,46 @@ router.post('/sendotp', async (req, res) => {
   }
 });
 
+router.post('/resetpassword', async (req, res) => {
+  try {
+    const { email,otp,newpassword} = req.body;
+   // if (!email) return res.status(400).json({ message: 'Email is not required u need to create a new account first' });
+     
+    if (!email || !newpassword || !otp) {
+      return res.status(400).json({ message: 'All input is required' });
+    }
+
+    // Check if OTP exists
+    const storedOtp = await OTP.findOne({ email, otp });
+    if (!storedOtp) return res.status(400).json({ message: 'Invalid or expired OTP' });
+    // Ensure OTP is within 5 minutes
+    const timeDifference = (Date.now() - storedOtp.createdAt) / 1000; // Convert to seconds
+    if (timeDifference > 300) {
+      await OTP.deleteOne({ email });
+      return res.status(400).json({ message: 'OTP expired' });
+    }
+    // Remove OTP after verification
+    await OTP.deleteOne({ email });
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: 'account does not exist u need to create new account first' });
+    
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newpassword, salt);
+    // update new password
+    await User.updateOne({ email },{ $set: { password: hashedPassword } });
+    res.status(200).json({ message: 'password updated successfully' });
+  } catch (error) {
+    console.log(error); 
+    res.status(500).json({ message: 'Error updating password' });
+  }
+});
+
+
+
+    let existingUser = await
+
 // 🔹 Verify OTP & Register User
 router.post('/register', async (req, res) => {
   try {

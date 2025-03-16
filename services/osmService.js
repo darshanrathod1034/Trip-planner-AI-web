@@ -1,36 +1,31 @@
 import axios from "axios";
 import place from "../models/place.js";
 
-const OVERPASS_URL = "http://overpass-api.de/api/interpreter";
+const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
 
 export const fetchPlacesFromOSM = async (cityName) => {
   try {
-    const query = `
-    [out:json];
-    area[name="${cityName}"]->.searchArea;
-    (
-      node["tourism"="attraction"](area.searchArea);
-      node["amenity"="restaurant"](area.searchArea);
-      node["amenity"="hotel"](area.searchArea);
-    );
-    out body;
-    `;
-    
-    const response = await axios.get(OVERPASS_URL, { params: { data: query } });
-    
-    let places = response.data.elements.map((element) => ({
-      name: element.tags?.name || "Unknown",
-      lat: element.lat,
-      lng: element.lon,
-      type: element.tags?.tourism || element.tags?.amenity || "",
+    const response = await axios.get(NOMINATIM_URL, {
+      params: {
+        q: cityName,  // Search city
+        format: "json",
+        addressdetails: 1,
+        limit: 50,  // Get top 10 places
+      },
+    });
+
+    let places = response.data.map((place) => ({
+      name: place.display_name,
+      lat: place.lat,
+      lng: place.lon,
+      type: place.type,
       city: cityName,
     }));
 
-    await place.insertMany(places);
-    console.log(`✅ Stored ${places.length} places in the database.`);
+    console.log(`✅ Found ${places.length} places in ${cityName}`);
     return places;
-    
   } catch (error) {
-    console.error("Error fetching OSM places:", error);
+    console.error("❌ Error fetching places:", error);
+    return [];
   }
 };
